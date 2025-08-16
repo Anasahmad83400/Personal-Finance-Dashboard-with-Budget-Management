@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Tracker - Personal Financial Management</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="navbar">
+        <div class="container">
+            <div class="navbar__content">
+                <div class="navbar__brand">
+                    <h1 class="navbar__title">💰 Finance Tracker</h1>
+                </div>
+                <nav class="navbar__nav">
+                    <button class="btn btn--outline btn--sm" id="exportBtn">Export Data</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Dashboard Overview -->
+            <section class="dashboard">
+                <div class="dashboard__header">
+                    <h2>Dashboard Overview</h2>
+                    <div class="date-filter">
+                        <select class="form-control form-control--inline" id="monthFilter">
+                            <option value="all">All Time</option>
+                            <option value="current" selected>Current Month</option>
+                            <option value="last">Last Month</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="card stat-card stat-card--primary">
+                        <div class="stat-card__content">
+                            <div class="stat-card__value" id="totalBalance">$0.00</div>
+                            <div class="stat-card__label">Total Balance</div>
+                        </div>
+                        <div class="stat-card__icon">💳</div>
+                    </div>
+                    
+                    <div class="card stat-card stat-card--success">
+                        <div class="stat-card__content">
+                            <div class="stat-card__value" id="monthlyIncome">$0.00</div>
+                            <div class="stat-card__label">Monthly Income</div>
+                        </div>
+                        <div class="stat-card__icon">📈</div>
+                    </div>
+                    
+                    <div class="card stat-card stat-card--warning">
+                        <div class="stat-card__content">
+                            <div class="stat-card__value" id="monthlyExpenses">$0.00</div>
+                            <div class="stat-card__label">Monthly Expenses</div>
+                        </div>
+                        <div class="stat-card__icon">📊</div>
+                    </div>
+                    
+                    <div class="card stat-card stat-card--info">
+                        <div class="stat-card__content">
+                            <div class="stat-card__value" id="monthlySavings">$0.00</div>
+                            <div class="stat-card__label">Monthly Savings</div>
+                        </div>
+                        <div class="stat-card__icon">💵</div>
+                    </div>
+                </div>
+
+                <!-- Charts and Budget Section -->
+                <div class="dashboard__content">
+                    <div class="dashboard__left">
+                        <!-- Expense Chart -->
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Expense Breakdown</h3>
+                                <div class="chart-container" style="position: relative; height: 300px;">
+                                    <canvas id="expenseChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Monthly Trend Chart -->
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Monthly Spending Trend</h3>
+                                <div class="chart-container" style="position: relative; height: 300px;">
+                                    <canvas id="trendChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard__right">
+                        <!-- Budget Progress -->
+                        <div class="card">
+                            <div class="card__body">
+                                <div class="budget-header">
+                                    <h3>Budget Progress</h3>
+                                    <button class="btn btn--secondary btn--sm" id="setBudgetBtn">Set Budget</button>
+                                </div>
+                                <div id="budgetList" class="budget-list"></div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Transactions -->
+                        <div class="card">
+                            <div class="card__body">
+                                <div class="transactions-header">
+                                    <h3>Recent Transactions</h3>
+                                    <button class="btn btn--primary btn--sm" id="addExpenseBtn">Add Expense</button>
+                                </div>
+                                <div id="transactionsList" class="transactions-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Add Expense Modal -->
+    <div id="expenseModal" class="modal hidden">
+        <div class="modal__overlay">
+            <div class="modal__content">
+                <div class="modal__header">
+                    <h3 id="modalTitle">Add New Expense</h3>
+                    <button class="modal__close" id="closeModal">&times;</button>
+                </div>
+                <form id="expenseForm" class="modal__body">
+                    <div class="form-group">
+                        <label class="form-label" for="expenseAmount">Amount ($)</label>
+                        <input type="number" class="form-control" id="expenseAmount" step="0.01" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="expenseCategory">Category</label>
+                        <select class="form-control" id="expenseCategory" required>
+                            <option value="">Select a category</option>
+                            <option value="Food">Food</option>
+                            <option value="Transportation">Transportation</option>
+                            <option value="Shopping">Shopping</option>
+                            <option value="Bills">Bills</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Healthcare">Healthcare</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="expenseDescription">Description</label>
+                        <input type="text" class="form-control" id="expenseDescription" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="expenseDate">Date</label>
+                        <input type="date" class="form-control" id="expenseDate" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="expenseType">Type</label>
+                        <select class="form-control" id="expenseType" required>
+                            <option value="expense">Expense</option>
+                            <option value="income">Income</option>
+                        </select>
+                    </div>
+                    
+                    <div class="modal__actions">
+                        <button type="button" class="btn btn--outline" id="cancelBtn">Cancel</button>
+                        <button type="submit" class="btn btn--primary">Save Transaction</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Set Budget Modal -->
+    <div id="budgetModal" class="modal hidden">
+        <div class="modal__overlay">
+            <div class="modal__content">
+                <div class="modal__header">
+                    <h3>Set Monthly Budgets</h3>
+                    <button class="modal__close" id="closeBudgetModal">&times;</button>
+                </div>
+                <form id="budgetForm" class="modal__body">
+                    <div id="budgetInputs" class="budget-inputs"></div>
+                    <div class="modal__actions">
+                        <button type="button" class="btn btn--outline" id="cancelBudgetBtn">Cancel</button>
+                        <button type="submit" class="btn btn--primary">Save Budgets</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
